@@ -30,6 +30,7 @@ npm run lint
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **Linting**: ESLint 9 with Next.js config (flat config format)
 - **Fonts**: Geist Sans and Geist Mono (auto-optimized via next/font)
+- **Authentication**: Clerk (@clerk/nextjs)
 
 ## TypeScript Configuration
 
@@ -39,6 +40,55 @@ npm run lint
 - **Target**: ES2017
 - **JSX**: react-jsx (no need to import React in component files)
 - **No emit**: TypeScript only type-checks, Next.js handles compilation
+
+## Authentication (Clerk)
+
+This project uses Clerk for authentication. The integration follows the current Next.js App Router pattern:
+
+### Clerk Setup
+
+**Environment Variables** (`.env.local`):
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Publishable key from Clerk Dashboard
+- `CLERK_SECRET_KEY` - Secret key from Clerk Dashboard
+- Get keys from: https://dashboard.clerk.com/last-active?path=api-keys
+
+**Middleware** (`middleware.ts`):
+- Uses `clerkMiddleware()` from `@clerk/nextjs/server`
+- Runs on all routes except static files and Next.js internals
+- Always runs for API routes
+
+**Layout Integration** (`app/layout.tsx`):
+- App is wrapped with `<ClerkProvider>`
+- Header includes `<SignInButton>`, `<SignUpButton>`, and `<UserButton>`
+- Uses `<SignedIn>` and `<SignedOut>` components for conditional rendering
+
+### Using Clerk in Your Code
+
+**Server Components** (async functions):
+```typescript
+import { auth } from "@clerk/nextjs/server";
+
+export default async function MyPage() {
+  const { userId } = await auth();
+  if (!userId) {
+    // Handle unauthenticated state
+  }
+  // Use userId for server-side logic
+}
+```
+
+**Client Components**:
+```typescript
+"use client";
+import { useUser } from "@clerk/nextjs";
+
+export function MyComponent() {
+  const { user, isLoaded, isSignedIn } = useUser();
+  // Use user data in client components
+}
+```
+
+**Important**: Never use deprecated patterns like `authMiddleware()` or `_app.tsx` approach. Always import from `@clerk/nextjs` or `@clerk/nextjs/server`.
 
 ## Project Architecture
 
