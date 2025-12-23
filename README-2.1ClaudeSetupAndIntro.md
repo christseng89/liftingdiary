@@ -364,3 +364,174 @@ export default defineConfig({
 npx shadcn@latest init
 npx shadcn@latest add button
 ```
+
+## Generate db schema with Claude Code
+
+```claude prompt 1 / plan mode (alt+m):
+This is a workout logging app.  Plan a table schema to log workouts, each workout can have multiple exercises, and each exercise can have multiple sets.  Make sure this is normalized.  The schema must be created using Drizzle ORM for a Postgres db hosted on Neon.
+```
+
+```claude prompt 2 / plan mode (alt+m):
+Give me the table layout of each table for further review.
+```
+
+```claude prompt 3 / plan mode (alt+m):
+1. For the exercises table remove the muscle_group, equipment, category, and is_bodyweight columns.  They are not needed for this app.
+2. For the workouts table add started_at and completed_at columns to track the duration of the workout and remove the notes and date columns.  The duration_minutes column can be calculated from the timestamps.
+3. For the workout_exercises table remove the notes column.  Change the exercise_definition_id column to just exercise_id to reference the exercises table.  Change the order_index column to just order to indicate the sequence of exercises in the workout.
+4. For the exercise_sets table remove the notes, and rpe columns.  Change the order_index column to just order to indicate the sequence of sets for the exercise.
+```
+
+```claude proposed plan
+  Table 1: exercise_definitions
+
+  Purpose: Shared catalog of exercise types (simplified)
+
+  | Column      | Type         | Constraints                               | Description                         
+  |
+  |-------------|--------------|-------------------------------------------|---------------------------------------|
+  | id          | integer      | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Auto-incrementing ID                
+  |
+  | name        | varchar(255) | NOT NULL, UNIQUE                          | Exercise name (e.g., "Barbell Squat") |
+  | description | text         | nullable                                  | Detailed description/instructions     |
+  | is_active   | boolean      | NOT NULL, DEFAULT true                    | Soft delete flag                    
+  |
+  | created_at  | timestamp    | NOT NULL, DEFAULT now()                   | Record creation time                
+  |
+  | updated_at  | timestamp    | NOT NULL, DEFAULT now()                   | Auto-updates on modification          |
+
+  Indexes:
+  - Primary key on id
+  - Unique constraint on name
+
+  ---
+  Table 2: workouts (Updated)
+
+  Purpose: User workout sessions with start/end timestamps
+
+  | Column       | Type         | Constraints                               | Description                     |  
+  |--------------|--------------|-------------------------------------------|---------------------------------|  
+  | id           | integer      | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY | Auto-incrementing ID            |  
+  | user_id      | varchar(255) | NOT NULL                                  | Clerk user ID (string)          |  
+  | name         | varchar(255) | NOT NULL                                  | Workout name (e.g., "Push Day") |  
+  | started_at   | timestamp    | nullable                                  | When user started workout       |  
+  | completed_at | timestamp    | nullable                                  | When user finished workout      |  
+  | created_at   | timestamp    | NOT NULL, DEFAULT now()                   | Record creation time            |  
+  | updated_at   | timestamp    | NOT NULL, DEFAULT now()                   | Auto-updates on modification    |  
+
+  Indexes:
+  - Primary key on id
+  - Index on user_id for user lookups
+  - Index on started_at for chronological queries
+  - Composite index on (user_id, started_at) for efficient user workout history
+
+  Derived Values:
+  - Workout date: Extract from started_at (e.g., DATE(started_at))
+  - Duration in minutes: (completed_at - started_at) / 60000 milliseconds
+
+  ---
+  Table 3: workout_exercises
+
+  Purpose: Junction table linking exercises to specific workouts (simplified)
+
+  | Column      | Type      | Constraints                                              | Description             
+         |
+  |-------------|-----------|----------------------------------------------------------|----------------------------------|
+  | id          | integer   | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY                | Auto-incrementing ID             |
+  | workout_id  | integer   | NOT NULL, FK → workouts.id (CASCADE DELETE)              | Which workout this belongs to    |
+  | exercise_id | integer   | NOT NULL, FK → exercise_definitions.id (RESTRICT DELETE) | Which exercise from catalog      |
+  | order       | integer   | NOT NULL                                                 | Position in workout (0, 1, 2...) |
+  | created_at  | timestamp | NOT NULL, DEFAULT now()                                  | Record creation time             |
+
+  Foreign Keys:
+  - workout_id → workouts.id ON DELETE CASCADE
+  - exercise_id → exercise_definitions.id ON DELETE RESTRICT
+
+  Unique Constraints:
+  - (workout_id, order) - Prevents duplicate ordering within same workout
+
+  Indexes:
+  - Primary key on id
+  - Index on workout_id
+
+  ---
+  Table 4: exercise_sets
+
+  Purpose: Individual sets for each exercise instance (simplified)
+
+  | Column              | Type         | Constraints                                          | Description                            |
+  |---------------------|--------------|------------------------------------------------------|----------------------------------------|
+  | id                  | integer      | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY            | Auto-incrementing ID                   |
+  | workout_exercise_id | integer      | NOT NULL, FK → workout_exercises.id (CASCADE DELETE) | Which exercise instance                |
+  | order               | integer      | NOT NULL                                             | Set number (0, 1, 2...)                |
+  | reps                | integer      | NOT NULL                                             | Repetitions completed                  |
+  | weight_lbs          | numeric(6,2) | nullable                                             | Weight in pounds (null for bodyweight) |
+  | created_at          | timestamp    | NOT NULL, DEFAULT now()                              | Record creation time                   |
+
+  Foreign Keys:
+  - workout_exercise_id → workout_exercises.id ON DELETE CASCADE
+
+  Unique Constraints:
+  - (workout_exercise_id, order) - Prevents duplicate set ordering within same exercise
+
+  Indexes:
+  - Primary key on id
+  - Index on workout_exercise_id
+
+  ---
+  Simplified Schema Benefits
+
+  ✅ Cleaner: Removed unnecessary metadata columns
+  ✅ Flexible timestamps: started_at/completed_at allow live tracking during workout
+  ✅ Calculated duration: No redundant duration_minutes storage
+  ✅ Simpler column names: order instead of order_index
+  ✅ Core tracking only: Focus on reps and weight
+
+  This is a much leaner schema! Should I update the implementation plan file with these changes?
+
+  => Yes
+  => Yes, and auto-accept edits
+  => Write the plan and Implementation Summary to a md file called DB_Schema_PlanWImplementation.md
+```
+
+### Step 6 - Applying changes to the database
+
+<https://dashboard.clerk.com/apps> -> **ClaudePro** -> **Sign ups** -> **samfire5200@gmail.com** -> **View profile**
+
+- Copy **User ID** -> user_378pkx01EpUKOTsNEPngV0twzUa
+
+```bash
+npx tsx db/drop-tables.ts
+# 🗑️  Dropping all tables...
+# ✅ Dropped: exercise_sets
+# ✅ Dropped: workout_exercises
+# ✅ Dropped: workouts
+# ✅ Dropped: exercise_definitions
+# ✅ All tables dropped successfully
+
+npx drizzle-kit generate
+# 4 tables
+# exercise_definitions 6 columns 0 indexes 0 fks
+# exercise_sets 6 columns 0 indexes 1 fks
+# workout_exercises 5 columns 0 indexes 2 fks
+# workouts 7 columns 0 indexes 0 fks
+
+npx drizzle-kit push
+# [✓] Pulling schema from database...
+# [✓] Changes applied
+
+# npm run db:seed
+
+```
+
+### Step 7 - Verify tables created
+
+<https://console.neon.tech/> -> **LiftingDiary** ->
+
+1. **Tables** to verify tables created
+2. **Query Editor** -> Run the generated SQL to create tables.
+   select * from exercise_definitions;
+
+## Use Neon MCP in Claude Code to generate example data to seed the db
+
+<https://neon.com/guides/claude-code-mcp-neon#bonus-creating-a-project-and-branch>
