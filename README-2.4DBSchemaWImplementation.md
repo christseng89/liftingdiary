@@ -26,7 +26,7 @@ This document contains the complete plan and implementation details for the norm
 
 #### 4 Normalized Tables
 
-1. **exercise_definitions** - Shared catalog of exercise types
+1. **exercises** - Shared catalog of exercise types
    - Fields: id, name, description, is_active
    - Soft delete support via `is_active` flag
    - No userId (shared across all users)
@@ -46,7 +46,7 @@ This document contains the complete plan and implementation details for the norm
    - Cascade delete from workout, restrict delete from exercise definition
    - Simplified: No notes field, renamed exercise_definition_id → exercise_id
 
-4. **exercise_sets** - Individual sets for each exercise
+4. **sets** - Individual sets for each exercise
    - Foreign key: workout_exercise_id
    - Fields: order, reps (required), weight_lbs (nullable)
    - Cascade delete from workout_exercise
@@ -55,8 +55,8 @@ This document contains the complete plan and implementation details for the norm
 #### Relationships
 
 - workouts (1) → (many) workout_exercises
-- exercise_definitions (1) → (many) workout_exercises
-- workout_exercises (1) → (many) exercise_sets
+- exercises (1) → (many) workout_exercises
+- workout_exercises (1) → (many) sets
 
 ### Implementation Steps
 
@@ -90,7 +90,7 @@ export { db };
 
 #### Step 3: Create Seed Script (`db/seed.ts`)
 
-Populate exercise_definitions with ~15-20 common exercises (simplified list):
+Populate exercises with ~15-20 common exercises (simplified list):
 
 - Barbell Squat, Barbell Bench Press, Barbell Deadlift, Barbell Overhead Press, Barbell Row
 - Dumbbell Bench Press, Dumbbell Shoulder Press, Dumbbell Row
@@ -136,7 +136,7 @@ Re-export schema types and define complex relation types:
 4. **Timestamp-based duration** - started_at/completed_at instead of storing duration
 5. **Simple column names** - `order` instead of `order_index`, `exercise_id` instead of `exercise_definition_id`
 6. **Cascade deletes** on dependent tables (workout → exercises → sets)
-7. **Restrict delete** on exercise_definitions prevents deleting catalog items in use
+7. **Restrict delete** on exercises prevents deleting catalog items in use
 8. **Shared exercise catalog** across all users (no user_id on definitions)
 9. **Weight in lbs** as decimal(6,2) - handles up to 9999.99 lbs with precision
 10. **Unique constraints** prevent duplicate ordering within same workout/exercise
@@ -154,7 +154,7 @@ Re-export schema types and define complex relation types:
 ### Future Extensibility
 
 - Can add notes fields to workouts/exercises/sets if needed
-- Can add RPE/RIR tracking via new column on exercise_sets
+- Can add RPE/RIR tracking via new column on sets
 - Can add rest time, tempo, failure flags via new columns
 - Can add exercise metadata (muscle group, equipment) if filtering becomes important
 - Can add user-specific exercise definitions via separate table
@@ -165,7 +165,7 @@ Re-export schema types and define complex relation types:
 
 ## Part 2: Detailed Table Schemas
 
-### Table 1: exercise_definitions
+### Table 1: exercises
 
 | Column | Type | Constraints |
 | -------- | ------ | ------------- |
@@ -196,13 +196,13 @@ Re-export schema types and define complex relation types:
 | -------- | ------ | ------------- |
 | id | integer | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY |
 | workout_id | integer | NOT NULL, FK → workouts.id (CASCADE) |
-| exercise_id | integer | NOT NULL, FK → exercise_definitions.id (RESTRICT) |
+| exercise_id | integer | NOT NULL, FK → exercises.id (RESTRICT) |
 | order | integer | NOT NULL |
 | created_at | timestamp | NOT NULL, DEFAULT now() |
 
 **Unique**: (workout_id, order)
 
-### Table 4: exercise_sets
+### Table 4: sets
 
 | Column | Type | Constraints |
 | -------- | ------ | ------------- |
@@ -225,10 +225,10 @@ Re-export schema types and define complex relation types:
 
 Complete schema with 4 normalized tables:
 
-- `exercise_definitions` - Shared exercise catalog
+- `exercises` - Shared exercise catalog
 - `workouts` - User workout sessions with started_at/completed_at
 - `workout_exercises` - Junction table with order field
-- `exercise_sets` - Individual sets with nullable weight_lbs
+- `sets` - Individual sets with nullable weight_lbs
 
 Includes:
 

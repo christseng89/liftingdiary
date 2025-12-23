@@ -379,11 +379,11 @@ Give me the table layout of each table for further review.
 1. For the exercises table remove the muscle_group, equipment, category, and is_bodyweight columns.  They are not needed for this app.
 2. For the workouts table add started_at and completed_at columns to track the duration of the workout and remove the notes and date columns.  The duration_minutes column can be calculated from the timestamps.
 3. For the workout_exercises table remove the notes column.  Change the exercise_definition_id column to just exercise_id to reference the exercises table.  Change the order_index column to just order to indicate the sequence of exercises in the workout.
-4. For the exercise_sets table remove the notes, and rpe columns.  Change the order_index column to just order to indicate the sequence of sets for the exercise.
+4. For the sets table remove the notes, and rpe columns.  Change the order_index column to just order to indicate the sequence of sets for the exercise.
 ```
 
 ```claude proposed plan
-  Table 1: exercise_definitions
+  Table 1: exercises
 
   Purpose: Shared catalog of exercise types (simplified)
 
@@ -439,13 +439,13 @@ Give me the table layout of each table for further review.
   |-------------|-----------|----------------------------------------------------------|----------------------------------|
   | id          | integer   | PRIMARY KEY, GENERATED ALWAYS AS IDENTITY                | Auto-incrementing ID             |
   | workout_id  | integer   | NOT NULL, FK → workouts.id (CASCADE DELETE)              | Which workout this belongs to    |
-  | exercise_id | integer   | NOT NULL, FK → exercise_definitions.id (RESTRICT DELETE) | Which exercise from catalog      |
+  | exercise_id | integer   | NOT NULL, FK → exercises.id (RESTRICT DELETE) | Which exercise from catalog      |
   | order       | integer   | NOT NULL                                                 | Position in workout (0, 1, 2...) |
   | created_at  | timestamp | NOT NULL, DEFAULT now()                                  | Record creation time             |
 
   Foreign Keys:
   - workout_id → workouts.id ON DELETE CASCADE
-  - exercise_id → exercise_definitions.id ON DELETE RESTRICT
+  - exercise_id → exercises.id ON DELETE RESTRICT
 
   Unique Constraints:
   - (workout_id, order) - Prevents duplicate ordering within same workout
@@ -455,7 +455,7 @@ Give me the table layout of each table for further review.
   - Index on workout_id
 
   ---
-  Table 4: exercise_sets
+  Table 4: sets
 
   Purpose: Individual sets for each exercise instance (simplified)
 
@@ -503,16 +503,16 @@ Give me the table layout of each table for further review.
 ```bash
 npx tsx db/drop-tables.ts
 # 🗑️  Dropping all tables...
-# ✅ Dropped: exercise_sets
+# ✅ Dropped: sets
 # ✅ Dropped: workout_exercises
 # ✅ Dropped: workouts
-# ✅ Dropped: exercise_definitions
-# ✅ All tables dropped successfully
+# ✅ Dropped: exercises
+# ✅ All tables dropped successfullyy
 
 npx drizzle-kit generate
 # 4 tables
-# exercise_definitions 6 columns 0 indexes 0 fks
-# exercise_sets 6 columns 0 indexes 1 fks
+# exercises 6 columns 0 indexes 0 fks
+# sets 6 columns 0 indexes 1 fks
 # workout_exercises 5 columns 0 indexes 2 fks
 # workouts 7 columns 0 indexes 0 fks
 
@@ -524,14 +524,37 @@ npx drizzle-kit push
 
 ```
 
+#### Seed the database
+
+<https://neon.com/guides/claude-code-mcp-neon#bonus-creating-a-project-and-branch>
+<https://neon.com/guides/claude-code-mcp-neon#option-1-setting-up-the-remote-hosted-neon-mcp-server-oauth>
+
+```cmd
+claude mcp add --transport http neon https://mcp.neon.tech/mcp
+claude
+  /mcp 
+    neon -> press Enter to login -> Authentication via Browser
+      ⎿  Authentication successful. Connected to neon.
+
+  List all of the available tables within the LiftingDiary db on Neon
+
+  Generate some example data for the above tables for user id user_378pkx01EpUKOTsNEPngV0twzUa. Do not insert any data just yet into the Neon database. I want to check the example data first.
+
+  This looks great. Now insert all of that example data to the LiftingDiary db on Neon.
+
+  List all data in table exercises.
+
+  List all data in table workout_exercises and link with the exercise and workout name.
+
+  List all data in sets and link with the exercise and workout name.
+```
+
 ### Step 7 - Verify tables created
 
 <https://console.neon.tech/> -> **LiftingDiary** ->
 
 1. **Tables** to verify tables created
 2. **Query Editor** -> Run the generated SQL to create tables.
-   select * from exercise_definitions;
+   select * from exercises;
 
 ## Use Neon MCP in Claude Code to generate example data to seed the db
-
-<https://neon.com/guides/claude-code-mcp-neon#bonus-creating-a-project-and-branch>

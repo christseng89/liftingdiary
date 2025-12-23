@@ -4,8 +4,8 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.exercise_definitions": {
-      "name": "exercise_definitions",
+    "public.exercises": {
+      "name": "exercises",
       "schema": "",
       "columns": {
         "id": {
@@ -15,7 +15,7 @@
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "exercise_definitions_id_seq",
+            "name": "exercises_id_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -63,20 +63,18 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "exercise_definitions_name_unique": {
-          "name": "exercise_definitions_name_unique",
+        "exercises_name_unique": {
+          "name": "exercises_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.exercise_sets": {
-      "name": "exercise_sets",
+    "public.sets": {
+      "name": "sets",
       "schema": "",
       "columns": {
         "id": {
@@ -86,7 +84,7 @@
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "exercise_sets_id_seq",
+            "name": "sets_id_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
@@ -130,16 +128,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "exercise_sets_workout_exercise_id_workout_exercises_id_fk": {
-          "name": "exercise_sets_workout_exercise_id_workout_exercises_id_fk",
-          "tableFrom": "exercise_sets",
+        "sets_workout_exercise_id_workout_exercises_id_fk": {
+          "name": "sets_workout_exercise_id_workout_exercises_id_fk",
+          "tableFrom": "sets",
           "tableTo": "workout_exercises",
-          "columnsFrom": [
-            "workout_exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workout_exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -203,25 +197,17 @@
           "name": "workout_exercises_workout_id_workouts_id_fk",
           "tableFrom": "workout_exercises",
           "tableTo": "workouts",
-          "columnsFrom": [
-            "workout_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["workout_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "workout_exercises_exercise_id_exercise_definitions_id_fk": {
-          "name": "workout_exercises_exercise_id_exercise_definitions_id_fk",
+        "workout_exercises_exercise_id_exercises_id_fk": {
+          "name": "workout_exercises_exercise_id_exercises_id_fk",
           "tableFrom": "workout_exercises",
-          "tableTo": "exercise_definitions",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "tableTo": "exercises",
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
