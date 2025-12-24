@@ -49,8 +49,13 @@ Ignore all Claude Code Changes
 /clear
 
     # PROMPT #4 (Create a new documentation file at docs/data-fetching.md.)
-    Create a new docs/data-fetching.md file and clearly state that all data fetching in this app must be done via Server Components. Data must not be fetched via route handlers, client components, or any other mechanism—only Server Components. This is critically important.
+    Create a new docs/data-fetching.md file and clearly state that all data fetching in this app must be done via Server Components. Data must NOT be fetched via route handlers, client components, or any other mechanism, ONLY Server Components. This is critically important.
 
-    All database queries must always be performed through helper functions in the /data directory. These helper functions must use Drizzle ORM to query the database. Do not use raw SQL.
+    All database queries must always be performed through helper functions in the /data directory. These helper functions must use Drizzle ORM to query the database. Do NOT use raw SQL.
 
-    It is extremely important that a logged-in user can only access their own data. Users must never be able to access data belonging to other users.
+    It is extremely important that a logged-in user can ONLY access their OWN data. Users must never be able to access data belonging to other users.
+
+/clear
+
+    # PROMPT #5 (Update the CLAUDE.md file to reference the new data-fetching documentation.)
+    Refer to the CLAUDE.md to implement data fetching for workouts on the dashboard page for the currently logged-in user based on the the date currently selected in the datepicker, and remove any existing dummy or placeholder data from that page.
