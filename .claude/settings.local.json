@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "Bash(npm run db:push:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npx shadcn@latest:*)",
+      "Bash(npx tsx:*)"
+    ]
+  }
+}
