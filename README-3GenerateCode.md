@@ -144,3 +144,18 @@ Great, that plan looks good. Please go ahead and implement it now.
 
 # PROMPT #14 (Add the redirect rule to the data-mutations.md documentation file.)
     Add this redirect rule into related md file in docs folder.    
+
+/clear
+```
+
+## Custom slash commands with Claude Code
+
+```cmd
+md .claude\commands
+```
+
+```claude
+quit
+
+/merge-and-create-branch main edit-workout-page
+```
