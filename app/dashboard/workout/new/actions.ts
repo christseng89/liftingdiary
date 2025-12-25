@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createWorkout } from "@/data/workouts";
 
@@ -15,11 +14,16 @@ const createWorkoutSchema = z.object({
 
 export type CreateWorkoutInput = z.infer<typeof createWorkoutSchema>;
 
-type ActionResult = {
-  success: false;
-  error: string;
-  issues?: z.ZodIssue[];
-};
+type ActionResult =
+  | {
+      success: true;
+      redirectUrl: string;
+    }
+  | {
+      success: false;
+      error: string;
+      issues?: z.ZodIssue[];
+    };
 
 export async function createWorkoutAction(input: CreateWorkoutInput): Promise<ActionResult> {
   let redirectUrl = "/dashboard";
@@ -43,6 +47,11 @@ export async function createWorkoutAction(input: CreateWorkoutInput): Promise<Ac
     }
 
     revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      redirectUrl,
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return {
@@ -58,7 +67,4 @@ export async function createWorkoutAction(input: CreateWorkoutInput): Promise<Ac
       error: "Failed to create workout. Please try again.",
     };
   }
-
-  // Redirect outside of try-catch (Next.js redirects throw internally)
-  redirect(redirectUrl);
 }

@@ -465,6 +465,253 @@ export async function createWorkoutWithExercisesAction(
 }
 ```
 
+### Pattern 5: Handling Redirects (Client-Side)
+
+**CRITICAL RULE: Server Actions MUST NOT use `redirect()` from `next/navigation` for post-mutation navigation. Always return a redirect URL and handle navigation on the client side.**
+
+#### Why Client-Side Redirects?
+
+Server-side redirects in Server Actions (`redirect()` from `next/navigation`) cause navigation by throwing an error internally. This approach:
+- ❌ Makes error handling complex (redirect throws, success doesn't)
+- ❌ Prevents returning success data alongside navigation
+- ❌ Can't be easily tested or debugged
+- ❌ Doesn't work well with `useActionState` patterns
+
+Client-side redirects provide:
+- ✅ Consistent return types (always return a result object)
+- ✅ Better error handling (no thrown errors for success cases)
+- ✅ Full control over navigation timing in the client
+- ✅ Ability to show loading states during navigation
+
+#### ❌ WRONG: Server-Side Redirect
+
+```typescript
+// app/dashboard/workouts/new/actions.ts
+"use server";
+
+import { redirect } from "next/navigation"; // DON'T DO THIS
+import { revalidatePath } from "next/cache";
+import { createWorkout } from "@/data/workouts";
+
+export async function createWorkoutAction(input: CreateWorkoutInput) {
+  const validated = createWorkoutSchema.parse(input);
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  await createWorkout(validated, userId);
+
+  revalidatePath("/dashboard/workouts");
+
+  // BAD: Server-side redirect throws internally
+  redirect("/dashboard/workouts");
+}
+```
+
+#### ✅ CORRECT: Client-Side Redirect
+
+**Server Action** (returns redirect URL):
+
+```typescript
+// app/dashboard/workouts/new/actions.ts
+"use server";
+
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { createWorkout } from "@/data/workouts";
+
+const createWorkoutSchema = z.object({
+  name: z.string().min(1).max(100),
+  startedAt: z.date(),
+  notes: z.string().max(500).optional(),
+  redirectDate: z.string().optional(), // Optional redirect parameter
+});
+
+type CreateWorkoutInput = z.infer<typeof createWorkoutSchema>;
+
+// Define discriminated union return type
+type ActionResult =
+  | {
+      success: true;
+      redirectUrl: string; // Return URL for client-side navigation
+    }
+  | {
+      success: false;
+      error: string;
+      issues?: z.ZodIssue[];
+    };
+
+export async function createWorkoutAction(
+  input: CreateWorkoutInput
+): Promise<ActionResult> {
+  try {
+    const validated = createWorkoutSchema.parse(input);
+
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    // Extract redirect parameters before mutation
+    const { redirectDate, ...workoutData } = validated;
+
+    await createWorkout(workoutData, userId);
+
+    // Build redirect URL based on input
+    const redirectUrl = redirectDate
+      ? `/dashboard/workouts?date=${redirectDate}`
+      : "/dashboard/workouts";
+
+    revalidatePath("/dashboard/workouts");
+
+    // GOOD: Return success with redirect URL
+    return {
+      success: true,
+      redirectUrl,
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: "Validation failed",
+        issues: error.issues,
+      };
+    }
+
+    console.error("Failed to create workout:", error);
+    return {
+      success: false,
+      error: "Failed to create workout. Please try again.",
+    };
+  }
+}
+```
+
+**Client Component** (handles redirect):
+
+```typescript
+// app/dashboard/workouts/new/create-workout-form.tsx
+"use client";
+
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createWorkoutAction } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+// Match the Server Action's return type
+type ActionState =
+  | {
+      success: true;
+      redirectUrl: string;
+    }
+  | {
+      success: false;
+      error: string;
+      issues?: z.ZodIssue[];
+    }
+  | null;
+
+export function CreateWorkoutForm({ selectedDate }: { selectedDate: Date }) {
+  const router = useRouter();
+
+  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+    async (_prevState: ActionState, formData: FormData): Promise<ActionState> => {
+      const input = {
+        name: formData.get("name") as string,
+        startedAt: new Date(formData.get("startedAt") as string),
+        notes: formData.get("notes") as string || undefined,
+        redirectDate: formData.get("redirectDate") as string,
+      };
+
+      // Call Server Action - returns success or error
+      return await createWorkoutAction(input);
+    },
+    null
+  );
+
+  // GOOD: Handle client-side redirect on success
+  useEffect(() => {
+    if (state?.success) {
+      router.push(state.redirectUrl);
+    }
+  }, [state, router]);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <Input name="name" placeholder="Workout name" required />
+      <Input name="startedAt" type="datetime-local" required />
+      <Input name="notes" placeholder="Notes" />
+      <input type="hidden" name="redirectDate" value={selectedDate.toISOString()} />
+
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Creating..." : "Create Workout"}
+      </Button>
+
+      {/* Type-safe error display */}
+      {state && !state.success && state.error && (
+        <p className="text-red-600">{state.error}</p>
+      )}
+    </form>
+  );
+}
+```
+
+#### Key Points
+
+1. **Return Type**: Server Actions that need to redirect must return a discriminated union:
+   ```typescript
+   type ActionResult =
+     | { success: true; redirectUrl: string }
+     | { success: false; error: string };
+   ```
+
+2. **No Redirect Import**: Never import `redirect` from `next/navigation` in Server Actions for post-mutation navigation
+
+3. **useEffect Pattern**: Use `useEffect` in the client component to watch for success state and call `router.push()`
+
+4. **Type Safety**: Client `ActionState` type must match the Server Action's return type
+
+5. **Consistent Returns**: All code paths return the same result shape (success or error), never throw for navigation
+
+6. **Error Handling**: Wrap in try-catch and return error objects instead of throwing
+
+7. **Optional Parameters**: You can pass redirect parameters (like dates, IDs) through the action input to customize the redirect URL
+
+#### When to Use Client-Side vs Server-Side Redirects
+
+**Use Client-Side Redirects** (Return URL):
+- ✅ After form submissions with Server Actions
+- ✅ When using `useActionState` hook
+- ✅ When you need consistent return types
+- ✅ When navigation depends on action result data
+
+**Use Server-Side Redirects** (`redirect()` function):
+- ✅ In Server Components (not Server Actions)
+- ✅ For authentication checks (e.g., redirect to login)
+- ✅ For page-level redirects (e.g., middleware, layout)
+- ✅ When you need immediate navigation without client interaction
+
+#### Example: Authentication Redirect (Server Component - OK to use redirect())
+
+```typescript
+// app/dashboard/workouts/new/page.tsx (Server Component)
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation"; // OK in Server Components
+import { CreateWorkoutForm } from "./create-workout-form";
+
+export default async function NewWorkoutPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    // GOOD: Server-side redirect in Server Component
+    redirect("/sign-in");
+  }
+
+  return <CreateWorkoutForm />;
+}
+```
+
 ## Layer 3: Client Components (Usage)
 
 ### Calling Server Actions from Client Components

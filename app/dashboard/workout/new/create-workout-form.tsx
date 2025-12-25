@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createWorkoutAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,13 +14,21 @@ interface CreateWorkoutFormProps {
   selectedDate: Date;
 }
 
-type ActionState = {
-  success: false;
-  error: string;
-  issues?: z.ZodIssue[];
-} | null;
+type ActionState =
+  | {
+      success: true;
+      redirectUrl: string;
+    }
+  | {
+      success: false;
+      error: string;
+      issues?: z.ZodIssue[];
+    }
+  | null;
 
 export function CreateWorkoutForm({ selectedDate }: CreateWorkoutFormProps) {
+  const router = useRouter();
+
   // Format the selected date with current time for datetime-local input
   // datetime-local expects format: YYYY-MM-DDTHH:MM
   const formatDateTimeLocal = (date: Date) => {
@@ -48,11 +57,18 @@ export function CreateWorkoutForm({ selectedDate }: CreateWorkoutFormProps) {
         redirectDate: redirectDateValue,
       };
 
-      // Call Server Action - it either returns error state or redirects
+      // Call Server Action - returns either success with redirect URL or error state
       return await createWorkoutAction(input);
     },
     null
   );
+
+  // Handle client-side redirect on success
+  useEffect(() => {
+    if (state?.success) {
+      router.push(state.redirectUrl);
+    }
+  }, [state, router]);
 
   return (
     <Card>
@@ -103,7 +119,7 @@ export function CreateWorkoutForm({ selectedDate }: CreateWorkoutFormProps) {
             />
           </div>
 
-          {state?.error && (
+          {state && !state.success && state.error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
               {state.error}
             </div>

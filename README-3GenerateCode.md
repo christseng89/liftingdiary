@@ -134,4 +134,13 @@ Great, that plan looks good. Please go ahead and implement it now.
 
 # PROMPT #12 (Implement the data mutation logic for creating a workout.)
     When creating a workout, the Started At date should default to the date selected on the Dashboard, using the current time. After completing the workout creation, the Dashboard should return to the previously selected date.
+
+/clear    
 ```
+
+```claude
+# PROMPT #13 (Fix the redirect after creating a workout so that it is done client side.)
+    The redirect should be done client side, NOT within the server action.
+
+# PROMPT #14 (Add the redirect rule to the data-mutations.md documentation file.)
+    Add this redirect rule into related md file in docs folder.    
