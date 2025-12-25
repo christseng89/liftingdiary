@@ -59,3 +59,14 @@ Ignore all Claude Code Changes
 
     # PROMPT #5 (Update the CLAUDE.md file to reference the new data-fetching documentation.)
     Refer to the CLAUDE.md to implement data fetching for workouts on the dashboard page for the currently logged-in user based on the the date currently selected in the datepicker, and remove any existing dummy or placeholder data from that page.
+
+/clear
+
+```
+
+## Automate git branching and merging with Claude Code
+
+```claude
+
+# PROMPT #6 (Create a plan for merging branches and creating a new branch.)
+    Give me a plan outlining how you would merge the dashboard-page branch into main, resolve any merge conflicts that come up, and then create a new branch from main called create-workout-page. Do not implement anything yet—just provide the plan and steps.
