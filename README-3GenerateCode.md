@@ -70,3 +70,38 @@ Ignore all Claude Code Changes
 
 # PROMPT #6 (Create a plan for merging branches and creating a new branch.)
     Give me a plan outlining how you would merge the dashboard-page branch into main, resolve any merge conflicts that come up, and then create a new branch from main called create-workout-page. Do not implement anything yet—just provide the plan and steps.
+```
+
+```bash
+  # Key Git Commands (Reference)
+
+  # Step 1: Review
+  git log main..dashboard-page --oneline
+  git diff main..dashboard-page
+
+  # Step 2: Update main
+  git checkout main
+  git pull origin main
+
+  # Step 3: Merge
+  git merge dashboard-page
+
+  # Step 4: If conflicts
+  git status
+  # ... resolve conflicts in files ...
+  git add <resolved-files>
+  git commit
+
+  # Step 6: Push
+  git push origin main
+
+  # Step 7: New branch
+  git checkout -b create-workout-page
+  git push -u origin create-workout-page
+
+  Ready to proceed when you give the go-ahead!
+```
+
+```claude
+Great, that plan looks good. Please go ahead and implement it now.
+```
