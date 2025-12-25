@@ -103,5 +103,22 @@ Ignore all Claude Code Changes
 ```
 
 ```claude
+# PROMPT #7 (Approve the plan and proceed with implementation.)
+
 Great, that plan looks good. Please go ahead and implement it now.
+
+/clear
+```
+
+## Generate the auth and data mutations docs with Claude Code
+
+```claude
+# PROMPT #8 (Create a new documentation file at docs/auth.md.)
+    Create a new `auth.md` documentation file under the /docs directory. This document SHOULD clearly define and Standardize all Authentication-related Coding practices used in the application, with an explicit focus on the use of Clerk as the Authentication Provider.
+
+# PROMPT #9 (Create a new documentation file at docs/data-mutations.md.)
+    Create a new `data-mutations.md` documentation file that defines the Coding Standards for all data-mutation logic in the application. This document should state that all data mutations MUST be performed through helper functions located in the `/data` directory, which wrap database operations by using Drizzle ORM.   
+    It SHOULD also require that all data mutations are executed exclusively via Server Actions defined in colocated `actions.ts` files. In addition, all Server Action parameters MUST be explicitly typed (NOT using the FormData data type), and every Server Action MUST validate its inputs using Zod before executing any database logic.
+
+/clear    
 ```
