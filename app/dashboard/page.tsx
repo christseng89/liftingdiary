@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { format, differenceInMinutes } from "date-fns";
+import Link from "next/link";
 
 import { getWorkoutsByUserIdAndDate } from "@/data/workouts";
 import { DatePicker } from "@/components/dashboard/date-picker";
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface DashboardPageProps {
   searchParams: Promise<{ date?: string }>;
@@ -51,9 +53,14 @@ export default async function DashboardPage({
           <h2 className="text-2xl font-semibold">
             Workouts for {format(selectedDate, "do MMM yyyy")}
           </h2>
-          <span className="text-sm text-muted-foreground">
-            {workouts.length} {workouts.length === 1 ? "workout" : "workouts"}
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">
+              {workouts.length} {workouts.length === 1 ? "workout" : "workouts"}
+            </span>
+            <Link href={`/dashboard/workout/new?date=${selectedDate.toISOString()}`}>
+              <Button>New Workout</Button>
+            </Link>
+          </div>
         </div>
 
         {workouts.length > 0 ? (
