@@ -215,3 +215,12 @@ quit
 
  /clear
 ```
+
+## Delete text in Claude Code’s inline edit mode in Claude Code’s inline edit mode
+
+| Action                  | Shortcut             |
+| ----------------------- | -------------------- |
+| Delete last word        | **Ctrl + Backspace** |
+| Clear entire input line | **Ctrl + U**         |
+| Delete one char         | **Backspace**        |
+
