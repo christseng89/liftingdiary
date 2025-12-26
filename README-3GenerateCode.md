@@ -179,3 +179,39 @@ quit
 
 # PROMPT #17 (Next.js 16 Server Components standards.)
     Create a new docs/server-components.md file that outlines the coding standards for Server Components, specifically noting that accessing params must be awaited, since this is a Next.js 16 project where params is a Promise and must be resolved asynchronously.
+
+/clear    
+```
+
+## Claude Code sub agents
+
+```create-docs.md
+Create a new documentation file at docs/$1.md to highlight the coding
+standards for this layer of the app, specifically the coding standards need to
+highlight: $2
+```
+
+```claude
+quit
+
+/agents
+ Create new agent
+ Project (.claude/agents)
+ Generate with Claude (recommended) 
+
+ Whenever a new documentation file is added into the /docs directory update the CLAUDE.md file to reference this new file within the list of documentation files under the ## Code Generation Requirements section.
+
+ # Enter + Alt => Enter
+
+  ☒ Read-only tools                                                                                           │
+  ☒ Edit tools
+
+ ❯ [ Continue ]
+ Sonnet
+ Blue
+
+ # Press Enter to create the agent in .claude/agents/docs-referencer.md
+ # Press Escape to exit.
+
+ /clear
+```
