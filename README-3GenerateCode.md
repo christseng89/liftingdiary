@@ -223,4 +223,3 @@ quit
 | Delete last word        | **Ctrl + Backspace** |
 | Clear entire input line | **Ctrl + U**         |
 | Delete one char         | **Backspace**        |
-
