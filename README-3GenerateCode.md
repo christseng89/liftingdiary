@@ -176,3 +176,6 @@ quit
 
 # PROMPT #16 (Implement the data mutation logic for updating a workout.)
     Use the Workout Date as the defaulted date for Completed At, ensure the Complete At is greater than the Started At.
+
+# PROMPT #17 (Next.js 16 Server Components standards.)
+    Create a new docs/server-components.md file that outlines the coding standards for Server Components, specifically noting that accessing params must be awaited, since this is a Next.js 16 project where params is a Promise and must be resolved asynchronously.

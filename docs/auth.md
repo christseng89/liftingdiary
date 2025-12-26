@@ -45,14 +45,16 @@ CLERK_SECRET_KEY=sk_test_...
 - ❌ **DO NOT**: Commit keys to version control
 - ❌ **DO NOT**: Use production keys in development
 
-## Middleware Configuration
+## Proxy Configuration (Middleware)
 
-### Required Setup (`middleware.ts`)
+### Required Setup (`proxy.ts`)
 
-The middleware must be configured at the root of your project:
+**IMPORTANT: Next.js 16+ uses `proxy.ts` instead of `middleware.ts`**
+
+The proxy must be configured at the root of your project:
 
 ```typescript
-// middleware.ts
+// proxy.ts
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
 export default clerkMiddleware();
@@ -68,17 +70,21 @@ export const config = {
 ```
 
 **Important**:
+- ✅ **Next.js 16+**: Use `proxy.ts` at the root of your project
+- ✅ **Next.js 15 and below**: Use `middleware.ts` (deprecated in v16)
 - This runs on every request (except static files)
 - Authentication happens automatically
 - No need to manually verify tokens
-- API routes are always protected by middleware
+- API routes are always protected by the proxy
 
-### Advanced Middleware (Protected Routes)
+**Deprecation Warning**: If you see a warning about "middleware" file convention being deprecated, rename `middleware.ts` to `proxy.ts`. The file contents remain the same.
+
+### Advanced Proxy (Protected Routes)
 
 To protect specific routes and redirect unauthenticated users:
 
 ```typescript
-// middleware.ts
+// proxy.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
@@ -493,12 +499,12 @@ export default async function ProtectedPage() {
 }
 ```
 
-### 3. Use Middleware for Route Protection
+### 3. Use Proxy for Route Protection
 
-For routes that should always require authentication, use middleware to redirect at the edge:
+For routes that should always require authentication, use the proxy to redirect at the edge:
 
 ```typescript
-// middleware.ts - handles auth before page even loads
+// proxy.ts - handles auth before page even loads
 const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {

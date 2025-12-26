@@ -39,6 +39,27 @@ npm start
 npm run lint
 ```
 
+## Critical Next.js 16 Changes
+
+**BREAKING CHANGE: Params are Promises**
+
+In Next.js 15+, route `params` and `searchParams` are asynchronous Promises and MUST be awaited:
+
+```typescript
+// ✅ CORRECT - Next.js 16 pattern
+interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ date?: string }>;
+}
+
+export default async function Page({ params, searchParams }: PageProps) {
+  const { id } = await params; // MUST await
+  const { date } = await searchParams; // MUST await
+}
+```
+
+**See [docs/server-components.md](./docs/server-components.md) for complete documentation.**
+
 ## Technology Stack
 
 - **Framework**: Next.js 16.1.0 (App Router)
@@ -69,7 +90,8 @@ This project uses Clerk for authentication. The integration follows the current 
 - `CLERK_SECRET_KEY` - Secret key from Clerk Dashboard
 - Get keys from: https://dashboard.clerk.com/last-active?path=api-keys
 
-**Middleware** (`middleware.ts`):
+**Proxy** (`proxy.ts`):
+- Next.js 16+ uses `proxy.ts` instead of deprecated `middleware.ts`
 - Uses `clerkMiddleware()` from `@clerk/nextjs/server`
 - Runs on all routes except static files and Next.js internals
 - Always runs for API routes
