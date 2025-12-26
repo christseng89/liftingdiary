@@ -131,3 +131,38 @@ export async function createWorkout(
 
   return workout;
 }
+
+/**
+ * Updates an existing workout.
+ *
+ * @param workoutId - The ID of the workout to update
+ * @param data - Partial workout data to update
+ * @param userId - The authenticated user's ID from Clerk
+ * @returns The updated workout, or null if not found or unauthorized
+ */
+export type UpdateWorkoutData = {
+  name?: string;
+  startedAt?: Date;
+  completedAt?: Date;
+  notes?: string;
+};
+
+export async function updateWorkout(
+  workoutId: number,
+  data: UpdateWorkoutData,
+  userId: string
+) {
+  // CRITICAL: Always verify userId ownership in WHERE clause
+  const [updated] = await db
+    .update(workouts)
+    .set(data)
+    .where(
+      and(
+        eq(workouts.id, workoutId),
+        eq(workouts.userId, userId) // Security: verify ownership
+      )
+    )
+    .returning();
+
+  return updated || null;
+}

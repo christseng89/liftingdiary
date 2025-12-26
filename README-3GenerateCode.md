@@ -154,8 +154,25 @@ Great, that plan looks good. Please go ahead and implement it now.
 md .claude\commands
 ```
 
+Create a new file at `.claude/commands/merge-and-create-branch.md` with the following content:
+
+```note
+Commit any changes in the current branch with an appropriate commit message based on the code changes. Then merge the current branch into the $1 branch, resolve any issues resulting from the merge, and finally create a new branch called $2.
+```
+
 ```claude
 quit
 
 /merge-and-create-branch main edit-workout-page
+
+/clear
 ```
+
+## Implement the update workout functionality
+
+```claude
+# PROMPT #15 (Create an Edit workout feature.)
+    Refer to CLAUDE.md and related files in docs directory.  Create a new page at `/dashboard/workout/[workoutId]` that will serve as the edit and update an existing workout as an Edit Workout button in the dashboard.
+
+# PROMPT #16 (Implement the data mutation logic for updating a workout.)
+    Use the Workout Date as the defaulted date for Completed At, ensure the Complete At is greater than the Started At.

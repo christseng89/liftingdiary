@@ -78,10 +78,19 @@ export default async function DashboardPage({
                   className="hover:shadow-md transition-shadow"
                 >
                   <CardHeader>
-                    <CardTitle>{workout.name}</CardTitle>
-                    <CardDescription>
-                      {duration ? `${duration} min` : "Duration not recorded"}
-                    </CardDescription>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle>{workout.name}</CardTitle>
+                        <CardDescription>
+                          {duration ? `${duration} min` : "Duration not recorded"}
+                        </CardDescription>
+                      </div>
+                      <Link href={`/dashboard/workout/${workout.id}?date=${selectedDate.toISOString()}`}>
+                        <Button variant="outline" size="sm">
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
