@@ -9,7 +9,8 @@
       "Bash(npx shadcn@latest:*)",
       "Bash(npx tsx:*)",
       "Bash(git checkout:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }
