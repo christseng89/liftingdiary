@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent flash of unstyled content - Apply dark mode by default */
+@layer base {
+  html {
+    @apply dark;
+  }
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
