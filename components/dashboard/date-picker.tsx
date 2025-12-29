@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,6 +20,7 @@ interface DatePickerProps {
 export function DatePicker({ selectedDate }: DatePickerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [open, setOpen] = useState(false);
 
   const handleDateChange = (newDate: Date | undefined) => {
     if (!newDate) return;
@@ -29,10 +31,13 @@ export function DatePicker({ selectedDate }: DatePickerProps) {
 
     // Update the URL, which will trigger a server-side re-render
     router.push(`?${params.toString()}`);
+
+    // Close the popover immediately after date selection
+    setOpen(false);
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
