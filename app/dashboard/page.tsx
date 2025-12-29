@@ -73,55 +73,53 @@ export default async function DashboardPage({
                   : null;
 
               return (
-                <Card
+                <Link
                   key={workout.id}
-                  className="hover:shadow-md transition-shadow"
+                  href={`/dashboard/workout/${workout.id}?date=${selectedDate.toISOString()}`}
+                  className="block"
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle>{workout.name}</CardTitle>
-                        <CardDescription>
-                          {duration ? `${duration} min` : "Duration not recorded"}
-                        </CardDescription>
-                      </div>
-                      <Link href={`/dashboard/workout/${workout.id}?date=${selectedDate.toISOString()}`}>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {workout.workoutExercises.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-1">
-                            Exercises:
-                          </h4>
-                          <ul className="list-disc list-inside text-sm text-muted-foreground">
-                            {workout.workoutExercises.map((we) => (
-                              <li key={we.id}>
-                                {we.exerciseDefinition.name}
-                                {we.sets.length > 0 && (
-                                  <span className="ml-2 text-xs">
-                                    ({we.sets.length}{" "}
-                                    {we.sets.length === 1 ? "set" : "sets"})
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle>{workout.name}</CardTitle>
+                          <CardDescription>
+                            {duration ? `${duration} min` : "Duration not recorded"}
+                          </CardDescription>
                         </div>
-                      )}
-                      {workout.workoutExercises.length === 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          No exercises recorded
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {workout.workoutExercises.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-medium mb-1">
+                              Exercises:
+                            </h4>
+                            <ul className="list-disc list-inside text-sm text-muted-foreground">
+                              {workout.workoutExercises.map((we) => (
+                                <li key={we.id}>
+                                  {we.exerciseDefinition.name}
+                                  {we.sets.length > 0 && (
+                                    <span className="ml-2 text-xs">
+                                      ({we.sets.length}{" "}
+                                      {we.sets.length === 1 ? "set" : "sets"})
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {workout.workoutExercises.length === 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            No exercises recorded
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </div>
