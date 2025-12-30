@@ -44,3 +44,29 @@ cd $HOME/.claude/commands && code .
 ```auto-commit.md
 Generate a commit message based on the changes within the current branch. The commit message must be short and to-the-point and provide a summary of the changes. Then commit those changes to the current git branch.
 ```
+
+```bash
+claude
+  /auto-commit
+
+    # /auto-commit            Generate a commit message based on the changes within the current branch. The commit   
+    #                         message must... (**user**)
+    # /auto-commit            Generate a commit message based on the changes within the current branch. The commit   
+    #                         message must... (**project**)
+
+/clear
+```
+
+```bash
+mkdir -p $HOME/.claude/commands/personal
+cd $HOME/.claude/commands
+# cp ../auto-commit.md .
+mv ./auto-commit.md ./personal/
+
+/auto-commit
+
+#   /auto-commit              Generate a commit message based on the changes within the current branch. The        
+#                             commit message must... (project)
+#   /personal:auto-commit     This is the user-scope command.  Generate a commit message based on the changes      
+#                             within the curren... (user)
+```
