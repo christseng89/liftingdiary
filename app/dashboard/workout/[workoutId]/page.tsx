@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { getWorkoutById } from "@/data/workouts";
+import { getAllExerciseDefinitions } from "@/data/exercises";
 import { EditWorkoutForm } from "./edit-workout-form";
+import { WorkoutExercisesSection } from "./workout-exercises-section";
 
 interface EditWorkoutPageProps {
   params: Promise<{ workoutId: string }>;
@@ -33,12 +35,24 @@ export default async function EditWorkoutPage({
     notFound();
   }
 
+  // Fetch all exercise definitions for selection
+  const exerciseDefinitions = await getAllExerciseDefinitions();
+
   // Get the redirect date from URL params (optional)
   const { date } = await searchParams;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <EditWorkoutForm workout={workout} redirectDate={date} />
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Workout Metadata Form */}
+      <div className="mb-8">
+        <EditWorkoutForm workout={workout} redirectDate={date} />
+      </div>
+
+      {/* Exercises Section */}
+      <WorkoutExercisesSection
+        workout={workout}
+        exerciseDefinitions={exerciseDefinitions}
+      />
     </div>
   );
 }
