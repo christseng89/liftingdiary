@@ -23,6 +23,24 @@ Lifting Diary is a Next.js 16.1.0 application using the App Router pattern with 
 
 **Failure to follow documentation standards may result in code that doesn't align with project architecture and will require refactoring.**
 
+## Documentation Reference
+
+This project includes comprehensive documentation in the `/docs` directory. **Always consult these documents before writing code:**
+
+- **[docs/server-components.md](./docs/server-components.md)** - Next.js 16 Server Components patterns, async params/searchParams, type safety
+- **[docs/data-fetching.md](./docs/data-fetching.md)** - Data fetching architecture, /data directory helpers, security patterns
+- **[docs/data-mutations.md](./docs/data-mutations.md)** - Server Actions, Zod validation, mutation patterns, client-side redirects
+- **[docs/auth.md](./docs/auth.md)** - Clerk authentication patterns, proxy.ts setup, security best practices
+- **[docs/routing.md](./docs/routing.md)** - Route protection, /dashboard prefix, navigation patterns
+- **[docs/ui.md](./docs/ui.md)** - shadcn/ui components, date-fns formatting, styling guidelines
+
+Each document contains:
+- ✅ Required patterns and best practices
+- ❌ Anti-patterns to avoid
+- 📝 Complete code examples
+- 🔒 Security requirements
+- ⚠️ Common mistakes and how to fix them
+
 ## Development Commands
 
 ```bash
@@ -66,9 +84,13 @@ export default async function Page({ params, searchParams }: PageProps) {
 - **Language**: TypeScript 5 (strict mode enabled)
 - **React**: 19.2.3
 - **Styling**: Tailwind CSS v4 with PostCSS
+- **UI Components**: shadcn/ui (exclusive component library)
+- **Database**: Drizzle ORM with PostgreSQL
+- **Authentication**: Clerk (@clerk/nextjs)
+- **Date Formatting**: date-fns
+- **Validation**: Zod
 - **Linting**: ESLint 9 with Next.js config (flat config format)
 - **Fonts**: Geist Sans and Geist Mono (auto-optimized via next/font)
-- **Authentication**: Clerk (@clerk/nextjs)
 
 ## TypeScript Configuration
 
@@ -135,29 +157,73 @@ export function MyComponent() {
 
 ```
 app/
-├── layout.tsx         # Root layout with font configuration and metadata
-├── page.tsx           # Home page (currently boilerplate)
-├── globals.css        # Global styles with Tailwind imports and theme config
-└── favicon.ico        # Site favicon
+├── layout.tsx                    # Root layout with ClerkProvider and ThemeProvider
+├── page.tsx                      # Public landing page
+├── globals.css                   # Global styles with Tailwind imports and theme config
+├── dashboard/
+│   ├── page.tsx                  # Dashboard home page
+│   └── workout/
+│       ├── new/
+│       │   ├── page.tsx          # Create new workout page
+│       │   ├── actions.ts        # Server actions for creating workouts
+│       │   └── create-workout-form.tsx
+│       └── [workoutId]/
+│           ├── page.tsx          # Edit/view workout page
+│           ├── actions.ts        # Server actions for updating workouts
+│           └── edit-workout-form.tsx
+└── favicon.ico
+
+components/
+├── ui/                           # shadcn/ui components (auto-generated)
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── input.tsx
+│   ├── calendar.tsx
+│   └── ...
+├── dashboard/
+│   └── date-picker.tsx           # Date picker component for dashboard
+├── layout/
+│   └── theme-toggle.tsx          # Theme toggle component
+└── providers/
+    └── theme-provider.tsx        # Theme provider for dark mode
+
+data/
+└── workouts.ts                   # Drizzle ORM database query functions
+
+db/
+├── index.ts                      # Drizzle database client
+└── schema.ts                     # Database schema definitions
 ```
 
 ### Current State
 
-This is a greenfield project. The following do not exist yet:
-- Custom components (no `components/` directory)
-- Custom hooks (no `lib/hooks/` directory)
-- Utilities (no `lib/utils/` directory)
-- Data models/types (no domain-specific types)
-- API routes (no `app/api/` directory)
-- Server actions (no `app/actions/` directory)
-- Database configuration
+The project now has:
+- ✅ **Components**: UI components using shadcn/ui in `components/ui/`
+- ✅ **Database**: Drizzle ORM configured with PostgreSQL schema
+- ✅ **Data Layer**: Query functions in `data/workouts.ts`
+- ✅ **Server Actions**: Mutation handlers colocated with features
+- ✅ **Authentication**: Clerk integration with protected routes via `proxy.ts`
+- ✅ **Theming**: Dark mode support with theme provider
+- ✅ **Workout Features**: Create and edit workout functionality implemented
+
+<!-- Not yet implemented:
+- ⏳ Exercises management
+- ⏳ Progress tracking
+- ⏳ Exercise definitions library
+- ⏳ Set tracking and history
+- ⏳ Custom hooks in `lib/hooks/`
+- ⏳ Utility functions in `lib/utils/` -->
 
 ### Root Layout (`app/layout.tsx`)
 
+- Wraps entire app with `<ClerkProvider>` for authentication
+- Includes `<ThemeProvider>` for dark mode support (system/light/dark)
 - Configures Geist Sans and Geist Mono fonts via `next/font/google`
 - Sets CSS variables: `--font-geist-sans` and `--font-geist-mono`
-- Exports `metadata` object for SEO (currently placeholder values)
-- Wraps all pages with `<html>` and `<body>` tags
+- Contains global header with:
+  - Sign In/Sign Up buttons for unauthenticated users
+  - User button and theme toggle for authenticated users
+- Exports `metadata` object for SEO
 
 ### Styling System (`app/globals.css`)
 

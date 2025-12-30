@@ -135,18 +135,21 @@ export default async function WorkoutsPage() {
 // app/dashboard/workouts/[id]/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { getWorkoutById } from "@/data/workouts";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function WorkoutDetailPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
+  // MUST await params (Next.js 16 pattern)
+  const { id } = await params;
+
   // userId parameter ensures user can only access their own workout
-  const workout = await getWorkoutById(params.id, userId);
+  const workout = await getWorkoutById(id, userId);
 
   if (!workout) {
     notFound();

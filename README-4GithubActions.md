@@ -91,3 +91,7 @@ Description: Each workout must be a link that navigates the user to /dashboard/w
 
 Title: Using the calendar in the dashboard, when a user clicks a date, load and display the workouts for that selected date, and immediately close (disable) the calendar popup.
 ```
+
+```bash
+git pull
+```
