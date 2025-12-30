@@ -183,7 +183,7 @@ quit
 /clear    
 ```
 
-## Claude Code sub agents
+## Claude Code SubAgents
 
 ```create-docs.md
 Create a new documentation file at docs/$1.md to highlight the coding
