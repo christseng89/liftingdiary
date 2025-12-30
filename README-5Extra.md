@@ -31,3 +31,16 @@ For the Add Set feature:
 /clear
 
 ```
+
+## Personal v projects custom slash commands
+
+```bash
+# Personal slash commands for project management
+mkdir -p $HOME/.claude/commands
+cd $HOME/.claude/commands && code .
+
+```
+
+```auto-commit.md
+Generate a commit message based on the changes within the current branch. The commit message must be short and to-the-point and provide a summary of the changes. Then commit those changes to the current git branch.
+```
