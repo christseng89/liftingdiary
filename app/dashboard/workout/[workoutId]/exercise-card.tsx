@@ -131,26 +131,14 @@ export function ExerciseCard({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {workoutExercise.sets.length > 0 ? (
-                    <>
-                      {workoutExercise.sets.map((set, index) => (
-                        <SetRow
-                          key={set.id}
-                          set={set}
-                          workoutId={workoutId}
-                          setNumber={index + 1}
-                        />
-                      ))}
-                    </>
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4">
-                        <span className="text-sm text-muted-foreground italic">
-                          No sets recorded yet. Add your first set below.
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  {workoutExercise.sets.map((set, index) => (
+                    <SetRow
+                      key={set.id}
+                      set={set}
+                      workoutId={workoutId}
+                      setNumber={index + 1}
+                    />
+                  ))}
                   {/* Add Set Form Row */}
                   <AddSetForm
                     workoutId={workoutId}

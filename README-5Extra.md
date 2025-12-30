@@ -23,4 +23,11 @@ Requirements:
 - Use a shadcn/ui <Table> component for displaying sets, if possible.
 
 /clear
+
+For the Add Set feature:
+- Do NOT display the empty-state message “No sets recorded yet. Add your first set below.”
+- Do NOT display placeholder text in the Reps and Weight (lbs) input fields.
+
+/clear
+
 ```

@@ -63,7 +63,6 @@ export function AddSetForm({
         <TableCell className="text-center">
           <Input
             type="number"
-            placeholder="Reps"
             value={reps}
             onChange={(e) => setReps(e.target.value)}
             onKeyDown={(e) => {
@@ -82,7 +81,6 @@ export function AddSetForm({
         <TableCell className="text-center">
           <Input
             type="number"
-            placeholder="Weight"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             onKeyDown={(e) => {
