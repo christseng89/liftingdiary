@@ -89,5 +89,5 @@ Add a comment
 Title: Make the workouts clickable on the /dashboard page.
 Description: Each workout must be a link that navigates the user to /dashboard/workout/[workoutId]
 
-Title: Make the entire site to Dark Mode by default with Toggle to Light/Dark/System Mode.
+Title: Using the calendar in the dashboard, when a user clicks a date, load and display the workouts for that selected date, and immediately close (disable) the calendar popup.
 ```
