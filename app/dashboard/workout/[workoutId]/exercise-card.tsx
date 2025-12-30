@@ -12,6 +12,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -111,32 +119,50 @@ export function ExerciseCard({
               </>
             )}
 
-            {/* Sets List */}
-            {workoutExercise.sets.length > 0 ? (
-              <div className="space-y-1 mb-2">
-                {workoutExercise.sets.map((set, index) => (
-                  <SetRow
-                    key={set.id}
-                    set={set}
+            {/* Sets List and Add Set Form */}
+            <div className="mb-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center">Set</TableHead>
+                    <TableHead className="text-center">Reps</TableHead>
+                    <TableHead className="text-center">Weight (lbs)</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {workoutExercise.sets.length > 0 ? (
+                    <>
+                      {workoutExercise.sets.map((set, index) => (
+                        <SetRow
+                          key={set.id}
+                          set={set}
+                          workoutId={workoutId}
+                          setNumber={index + 1}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-4">
+                        <span className="text-sm text-muted-foreground italic">
+                          No sets recorded yet. Add your first set below.
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {/* Add Set Form Row */}
+                  <AddSetForm
                     workoutId={workoutId}
-                    setNumber={index + 1}
+                    workoutExerciseId={workoutExercise.id}
+                    previousSet={
+                      workoutExercise.sets[workoutExercise.sets.length - 1]
+                    }
+                    nextSetNumber={workoutExercise.sets.length + 1}
                   />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground italic mb-4">
-                No sets recorded yet. Add your first set below.
-              </p>
-            )}
-
-            {/* Add Set Form */}
-            <AddSetForm
-              workoutId={workoutId}
-              workoutExerciseId={workoutExercise.id}
-              previousSet={
-                workoutExercise.sets[workoutExercise.sets.length - 1]
-              }
-            />
+                </TableBody>
+              </Table>
+            </div>
 
             {error && (
               <p className="text-sm text-red-600 mt-2">{error}</p>

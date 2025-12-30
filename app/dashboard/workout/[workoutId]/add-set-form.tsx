@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TableRow, TableCell } from "@/components/ui/table";
 import { addSetAction } from "./actions";
 import { Plus } from "lucide-react";
 import type { ExerciseSet } from "@/db/schema";
@@ -11,22 +12,18 @@ interface AddSetFormProps {
   workoutId: number;
   workoutExerciseId: number;
   previousSet?: ExerciseSet;
+  nextSetNumber: number;
 }
 
 export function AddSetForm({
   workoutId,
   workoutExerciseId,
   previousSet,
+  nextSetNumber,
 }: AddSetFormProps) {
-  // Pre-fill with previous set values for convenience
-  const [reps, setReps] = useState(
-    previousSet ? previousSet.reps.toString() : ""
-  );
-  const [weight, setWeight] = useState(
-    previousSet && previousSet.weightLbs
-      ? parseFloat(previousSet.weightLbs).toString()
-      : ""
-  );
+  // Start with blank inputs for user to fill in
+  const [reps, setReps] = useState("");
+  const [weight, setWeight] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -50,47 +47,77 @@ export function AddSetForm({
       if (!result.success) {
         setError(result.error);
       } else {
-        // Keep the values for next set (user convenience)
-        // Don't clear the form - makes it faster to log multiple similar sets
+        // Clear the form after successful submission
+        setReps("");
+        setWeight("");
       }
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
+    <>
+      <TableRow>
+        <TableCell className="text-center font-medium text-muted-foreground">
+          {nextSetNumber}
+        </TableCell>
+        <TableCell className="text-center">
           <Input
             type="number"
             placeholder="Reps"
             value={reps}
             onChange={(e) => setReps(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit(e as unknown as React.FormEvent);
+              }
+            }}
             disabled={isPending}
             min={1}
             max={999}
-            className="text-center"
+            className="text-center h-8"
             required
           />
-        </div>
-        <div className="flex-1">
+        </TableCell>
+        <TableCell className="text-center">
           <Input
             type="number"
-            placeholder="Weight (lbs)"
+            placeholder="Weight"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit(e as unknown as React.FormEvent);
+              }
+            }}
             disabled={isPending}
             min={0}
             max={9999}
             step={2.5}
-            className="text-center"
+            className="text-center h-8"
           />
-        </div>
-        <Button type="submit" disabled={isPending} className="shrink-0">
-          <Plus className="h-4 w-4 mr-1" />
-          Add Set
-        </Button>
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-    </form>
+        </TableCell>
+        <TableCell className="text-right">
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isPending}
+            size="sm"
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Set
+          </Button>
+        </TableCell>
+      </TableRow>
+      {error && (
+        <TableRow>
+          <TableCell colSpan={4} className="text-center py-2">
+            <span className="text-xs text-red-600">{error}</span>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }
